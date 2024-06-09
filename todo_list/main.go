@@ -246,8 +246,10 @@ func main() {
 				progressIndexEnd++
 				SortList(&list)
 			}
-		} else {
+		} else if strings.ToUpper(selection) == "Q" {
 			break
+		} else {
+			fmt.Println("Invalid selection")
 		}
 	}
 }
