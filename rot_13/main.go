@@ -8,14 +8,14 @@ import (
 	"strings"
 )
 
-func getIntFromInput(reader *bufio.Reader) int {
+func getIntFromInput(reader *bufio.Reader, minNum int, maxNum int) int {
 	input, err := reader.ReadString('\n')
 	if err != nil {
 		return -1
 	}
 	input = strings.TrimSpace(input)
 	numChoice, err := strconv.Atoi(input)
-	if err != nil || numChoice < 1 || numChoice > 25 {
+	if err != nil || numChoice < minNum || numChoice > maxNum {
 		return -1
 	}
 	return numChoice
@@ -49,13 +49,20 @@ func main() {
 		fmt.Println()
 	}
 	fmt.Print("Choose an option: ")
-	choice := getIntFromInput(reader)
+	choice := getIntFromInput(reader, 1, 25)
 	for choice == -1 { //error check
 		fmt.Print("Try again: ")
-		choice = getIntFromInput(reader)
+		choice = getIntFromInput(reader, 1, 25)
 	}
 
-	fmt.Print("Enter text: ") //text to shift
+	fmt.Print("Do you want to encode or decode?\n[1] Encode\n[2] Decode\n> ")
+	shiftType := getIntFromInput(reader, 1, 2)
+	for shiftType == -1 { //error check
+		fmt.Print("Try again: ")
+		shiftType = getIntFromInput(reader, 1, 2)
+	}
+
+	fmt.Print("Enter text: ") //text to shift or unshift
 	input := getWordInput(reader)
 	for input == "-1" { //error check
 		fmt.Print("Try again: ")
@@ -68,13 +75,24 @@ func main() {
 		fmt.Printf("Using : %s\n", input)
 	}
 
-	var shifted string //final result
+	var shifted string //final result. Either shifting left or right depending on encoding or decoding
 	for i := 0; i < len(input); i++ {
 		if input[i] == 32 { //space is OK
 			shifted += " "
 			continue
 		}
-		shifted += (string)((int(input[i])-97+choice)%26 + 97) //shift
+		if shiftType == 1 {
+			shifted += (string)((int(input[i])-97+choice)%26 + 97) //shift right
+		} else {
+			//here the +26 is to make sure modulus is positive
+			shifted += (string)((int(input[i])-97-choice+26)%26 + 97) //unshift (go left)
+
+		}
 	}
-	fmt.Printf("ROT %d: %s\n", choice, shifted) //result
+
+	if shiftType == 1 {
+		fmt.Printf("ROT %d: %s\n", choice, shifted) //result
+	} else {
+		fmt.Printf("Original: %s\n", shifted) //result
+	}
 }
