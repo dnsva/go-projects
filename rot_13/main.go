@@ -42,12 +42,22 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin) //reader setup
 
-	for i := 1; i <= 5; i++ { //display options in a table
+	fmt.Print("                       ____   ___ _____   _ _____ \n",
+		"                      |  _ \\ / _ \\_   _| / |___ / \n",
+		"                      | |_) | | | || |   | | |_ \\ \n",
+		"                      |  _ <| |_| || |   | |___) |\n",
+		"                      |_| \\\\_\\___/ |_|   |_|____/ \n",
+	)
+
+	fmt.Println("===========================================================================") //some formatting
+	for i := 1; i <= 5; i++ {                                                                  //display options in a table
 		for j := 1; j <= 5; j++ {
-			fmt.Printf("%d) ROT %d\t", (j-1)*5+i, (j-1)*5+i)
+			fmt.Printf("[%d] ROT %d\t", (j-1)*5+i, (j-1)*5+i)
 		}
 		fmt.Println()
 	}
+	fmt.Println("===========================================================================") //border
+
 	fmt.Print("Choose an option: ")
 	choice := getIntFromInput(reader, 1, 25)
 	for choice == -1 { //error check
@@ -55,6 +65,7 @@ func main() {
 		choice = getIntFromInput(reader, 1, 25)
 	}
 
+	fmt.Println("===========================================================================") //border
 	fmt.Print("Do you want to encode or decode?\n[1] Encode\n[2] Decode\n> ")
 	shiftType := getIntFromInput(reader, 1, 2)
 	for shiftType == -1 { //error check
@@ -62,14 +73,16 @@ func main() {
 		shiftType = getIntFromInput(reader, 1, 2)
 	}
 
-	fmt.Print("Enter text: ") //text to shift or unshift
+	fmt.Println("===========================================================================") //border
+	fmt.Print("Enter text: ")                                                                  //text to shift or unshift
 	input := getWordInput(reader)
 	for input == "-1" { //error check
 		fmt.Print("Try again: ")
 		input = getWordInput(reader)
 	}
 
-	if choice < 10 { //formatting
+	fmt.Println("===========================================================================") //border
+	if choice < 10 {                                                                           //formatting
 		fmt.Printf("Using: %s\n", input)
 	} else {
 		fmt.Printf("Using : %s\n", input)
