@@ -49,10 +49,61 @@ func main() {
 	}
 	defer gc.End()
 
-	gc.StartColor() //enable color
+	gc.StartColor()     //enable color
+	stdscr.Keypad(true) //enable keypad
 
-	gc.StdScr().Printf("Hello, World!")
+	//gc.StdScr().Printf("Hello, Wofffrld!")
 	gc.StdScr().Refresh()
+
+	//--------------------------------------------------------------------------------------------
+	//menu
+	menu_options := []string{"1. Convert text to binary and hex", "2. Convert binary to text", "3. Convert hex to text", "4. Change max string size", "5. Exit"}
+
+	var menu_choice int = 0
+
+	for {
+
+		// Hide cursor before displaying menu
+		gc.Cursor(0)
+
+		stdscr.MovePrint(0, 0, "Choose an option: ")
+		for i, option := range menu_options {
+			if i == menu_choice {
+				stdscr.AttrOn(gc.A_STANDOUT)
+			}
+			stdscr.MovePrint(i+1, 0, option)
+			stdscr.AttrOff(gc.A_STANDOUT)
+			stdscr.Refresh() //so that everything is displayed
+		}
+		c := stdscr.GetChar() //get key
+		if c == gc.KEY_DOWN {
+			menu_choice = (menu_choice + 1) % 5
+		} else if c == gc.KEY_UP {
+			menu_choice = (menu_choice + 4) % 5
+		} else if c == 10 {
+
+			stdscr.Clear() //clear the screen
+			gc.Cursor(1)   //show cursor
+
+			if menu_choice == 0 {
+				//text to binary and hex
+				stdscr.Refresh()
+			} else if menu_choice == 1 {
+				stdscr.Refresh()
+				//binary to text
+			} else if menu_choice == 2 {
+				stdscr.Refresh()
+				//hex to text
+			} else if menu_choice == 3 {
+				stdscr.Refresh()
+				//change max string size
+			} else {
+				//exit
+				stdscr.Refresh()
+				return
+			}
+		}
+	}
 
 	//char mesg[]="Enter a string: ";		/* message to be appeared on the screen */
 
