@@ -43,9 +43,14 @@ func strToHex(text string) string {
 
 func hexToStr(hex string) string {
 	var result string = ""
+	if len(hex)%2 != 0 {
+		//add leading 0
+		hex = "0" + hex
+	}
 	for i := 0; i < len(hex); i += 2 {
 		h := hex[i : i+2]
-		result += string(h) + " "
+		charCode, _ := strconv.ParseInt(h, 16, 64)
+		result += fmt.Sprintf("%c", charCode)
 	}
 	return result
 }
@@ -120,7 +125,7 @@ func main() {
 
 			} else if menu_choice == 1 {
 				//binary to text
-				var msg string = "Enter a binary string (NO SPACES): "
+				var msg string = "Enter a decimal string (NO SPACES): "
 
 				gc.Echo(false)
 
@@ -143,24 +148,58 @@ func main() {
 						stdscr.MovePrint(row+1, col, "GetString Error:", err)
 					}
 				}
-				//stdscr.Clear()
-				stdscr.MovePrintf(row+1, col, "You entered: %s", str)
-				//Display binary and hex
-				//trim sapce:
 				str = strings.TrimSpace(str)
+				stdscr.MovePrintf(row+1, col, "You entered: %s\n", str)
 				stdscr.MovePrintf(row+2, col, "Text: %s", binaryToStr(str))
 				stdscr.Refresh()
-
 				gc.Echo(true)
-
-				stdscr.GetChar()
-
+				stdscr.GetChar() //exit
 			} else if menu_choice == 2 {
 				stdscr.Refresh()
 				//hex to text
-			} else if menu_choice == 3 {
+				var msg string = "Enter a hexadecimal string (NO SPACES, CAPS): "
+
+				gc.Echo(false)
+
+				row, col := 0, 0
+				stdscr.MovePrint(0, 0, msg)
+
+				var str string = ""
+				for j := 0; j < max_input_size*8; j++ {
+					curr_char := stdscr.GetChar()
+					if curr_char == 10 {
+						break
+					} else if curr_char >= '0' && curr_char <= '9' || curr_char >= 'A' && curr_char <= 'F' {
+						stdscr.MovePrint(row, col+j+46, string(curr_char))
+					} else {
+						j--
+						continue
+					}
+					str += string(curr_char)
+					if err != nil {
+						stdscr.MovePrint(row+1, col, "GetString Error:", err)
+					}
+				}
+				str = strings.TrimSpace(str)
+				stdscr.MovePrintf(row+1, col, "You entered: %s\n", str)
+				stdscr.MovePrintf(row+2, col, "Text: %s", hexToStr(str))
 				stdscr.Refresh()
+				gc.Echo(true)
+				stdscr.GetChar() //exit
+			} else if menu_choice == 3 {
 				//change max string size
+				stdscr.Clear()
+				stdscr.MovePrint(0, 0, "Enter new max string size: ")
+				input, _ := stdscr.GetString(100)
+				input = strings.TrimSpace(input)
+				max_input_size, err = strconv.Atoi(input)
+				if err != nil {
+					stdscr.MovePrint(1, 0, "GetInteger Error:", err)
+				}
+				stdscr.MovePrintf(1, 0, "Max string size set to: %d", max_input_size)
+				stdscr.Refresh()
+				stdscr.GetChar() //exit
+
 			} else {
 				//exit
 				stdscr.Refresh()
