@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	gc "github.com/gbin/goncurses"
 )
@@ -17,9 +19,16 @@ func strToBinary(text string) string {
 
 func binaryToStr(binary string) string {
 	var result string = ""
+
+	if len(binary)%8 != 0 {
+		//add leading 0s
+		binary = strings.Repeat("0", 8-(len(binary)%8)) + binary
+	}
+
 	for i := 0; i < len(binary); i += 8 {
 		b := binary[i : i+8]
-		result += string(b)
+		charCode, _ := strconv.ParseInt(b, 2, 64)
+		result += fmt.Sprintf("%c", charCode)
 	}
 	return result
 }
@@ -61,10 +70,15 @@ func main() {
 
 	var menu_choice int = 0
 
+	var max_input_size int = 30
+
 	for {
 
 		// Hide cursor before displaying menu
 		gc.Cursor(0)
+
+		//Clear anything previous
+		stdscr.Clear()
 
 		stdscr.MovePrint(0, 0, "Choose an option: ")
 		for i, option := range menu_options {
@@ -83,14 +97,64 @@ func main() {
 		} else if c == 10 {
 
 			stdscr.Clear() //clear the screen
-			gc.Cursor(1)   //show cursor
 
 			if menu_choice == 0 {
 				//text to binary and hex
+				var msg string = "Enter a string (max size - " + strconv.Itoa(max_input_size) + "): "
+
+				row, col := 0, 0
+				stdscr.MovePrint(0, 0, msg)
+
+				var str string
+				str, err = stdscr.GetString(30) //max 30 chars
+				if err != nil {
+					stdscr.MovePrint(row+1, col, "GetString Error:", err)
+				} else {
+					stdscr.MovePrintf(row+1, col, "You entered: %s", str)
+					//Display binary and hex
+					stdscr.MovePrintf(row+2, col, "Binary: %s", strToBinary(str))
+					stdscr.MovePrintf(row+3, col, "Hex: %s", strToHex(str))
+				}
 				stdscr.Refresh()
+				stdscr.GetChar()
+
 			} else if menu_choice == 1 {
-				stdscr.Refresh()
 				//binary to text
+				var msg string = "Enter a binary string (NO SPACES): "
+
+				gc.Echo(false)
+
+				row, col := 0, 0
+				stdscr.MovePrint(0, 0, msg)
+
+				var str string = ""
+				for j := 0; j < max_input_size*8; j++ {
+					curr_char := stdscr.GetChar()
+					if curr_char == 10 {
+						break
+					} else if curr_char == '1' || curr_char == '0' {
+						stdscr.MovePrint(row, col+j+35, string(curr_char))
+					} else {
+						j--
+						continue
+					}
+					str += string(curr_char)
+					if err != nil {
+						stdscr.MovePrint(row+1, col, "GetString Error:", err)
+					}
+				}
+				//stdscr.Clear()
+				stdscr.MovePrintf(row+1, col, "You entered: %s", str)
+				//Display binary and hex
+				//trim sapce:
+				str = strings.TrimSpace(str)
+				stdscr.MovePrintf(row+2, col, "Text: %s", binaryToStr(str))
+				stdscr.Refresh()
+
+				gc.Echo(true)
+
+				stdscr.GetChar()
+
 			} else if menu_choice == 2 {
 				stdscr.Refresh()
 				//hex to text
@@ -104,58 +168,5 @@ func main() {
 			}
 		}
 	}
-
-	//char mesg[]="Enter a string: ";		/* message to be appeared on the screen */
-
-	msg := "Enter a string (max size - 30): "
-	//row, col := stdscr.MaxYX()
-	//row, col = (row/2)-1, (col-len(msg))/2
-
-	row, col := 0, 0
-	stdscr.MovePrint(row, col, msg)
-
-	var str string
-	str, err = stdscr.GetString(30) //max 30 chars
-	if err != nil {
-		stdscr.MovePrint(row+1, col, "GetString Error:", err)
-	} else {
-		stdscr.MovePrintf(row+1, col, "You entered: %s", str)
-		//Display binary and hex
-		stdscr.MovePrintf(row+2, col, "Binary: %s", strToBinary(str))
-		stdscr.MovePrintf(row+3, col, "Hex: %s", strToHex(str))
-	}
-
-	stdscr.Refresh()
-
-	stdscr.GetChar()
-
-	/*
-				setlocale(LC_ALL, ""); //enable utf-8
-			    initscr();             //initialize screen
-			    cbreak();              //other ncurses initialization
-			    noecho();              //other ncurses initialization
-			    curs_set(0);           //set cursor pos
-			    keypad(stdscr, TRUE);  //set to standard screen output
-			    start_color();         //enable color
-
-
-				refresh(); //send everything to screen
-
-
-				endwin(); //end ncurses mode
-
-				printw("W
-
-				mvprintw(i+1,0,"%d. %s\n", i+1, options[i].c_str()); //print option
-			            attroff(A_STANDOUT); //unhighlight
-
-		reader := bufio.NewReader(os.Stdin) //reader setup
-		text, _ := reader.ReadString('\n')  //read the line from the user
-		text = strings.TrimSpace(text)      //remove whitespace
-
-		fmt.Println("Binary: ", strToBinary(text))
-		fmt.Println("Hex: ", strToHex(text))
-
-		fmt.Println("hello")*/
 
 }
