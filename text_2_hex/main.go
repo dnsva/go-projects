@@ -9,6 +9,8 @@ import (
 	gc "github.com/gbin/goncurses"
 )
 
+//============================================================
+
 func strToBinary(text string) string {
 	var result string = ""
 	for _, c := range text {
@@ -16,6 +18,8 @@ func strToBinary(text string) string {
 	}
 	return result
 }
+
+//============================================================
 
 func binaryToStr(binary string) string {
 	var result string = ""
@@ -33,6 +37,8 @@ func binaryToStr(binary string) string {
 	return result
 }
 
+//============================================================
+
 func strToHex(text string) string {
 	var result string = ""
 	for _, c := range text {
@@ -40,6 +46,8 @@ func strToHex(text string) string {
 	}
 	return result
 }
+
+//============================================================
 
 func hexToStr(hex string) string {
 	var result string = ""
@@ -55,35 +63,32 @@ func hexToStr(hex string) string {
 	return result
 }
 
+//============================================================
+
 func main() {
 
-	stdscr, err := gc.Init()
+	stdscr, err := gc.Init() //intialize ncurses
 	if err != nil {
 		log.Fatal("init:", err)
 	}
 	defer gc.End()
 
-	gc.StartColor()     //enable color
 	stdscr.Keypad(true) //enable keypad
-
-	//gc.StdScr().Printf("Hello, Wofffrld!")
+	gc.Cursor(0)        //hide cursor
 	gc.StdScr().Refresh()
 
-	//--------------------------------------------------------------------------------------------
-	//menu
-	menu_options := []string{"1. Convert text to binary and hex", "2. Convert binary to text", "3. Convert hex to text", "4. Change max string size", "5. Exit"}
+	//-----------------------------------------------------------
 
+	menu_options := []string{"1. Convert text to binary and hex",
+		"2. Convert binary to text",
+		"3. Convert hex to text",
+		"4. Change max string size", "5. Exit"}
 	var menu_choice int = 0
-
 	var max_input_size int = 30
 
 	for {
 
-		// Hide cursor before displaying menu
-		gc.Cursor(0)
-
-		//Clear anything previous
-		stdscr.Clear()
+		stdscr.Clear() //Clear anything previous
 
 		stdscr.MovePrint(0, 0, "Choose an option: ")
 		for i, option := range menu_options {
@@ -94,44 +99,41 @@ func main() {
 			stdscr.AttrOff(gc.A_STANDOUT)
 			stdscr.Refresh() //so that everything is displayed
 		}
+		//....................................................
+
 		c := stdscr.GetChar() //get key
 		if c == gc.KEY_DOWN {
 			menu_choice = (menu_choice + 1) % 5
+
 		} else if c == gc.KEY_UP {
 			menu_choice = (menu_choice + 4) % 5
+
 		} else if c == 10 {
 
 			stdscr.Clear() //clear the screen
 
-			if menu_choice == 0 {
-				//text to binary and hex
+			////////////////////////////////////////////////////////
+			if menu_choice == 0 { //text to binary and hex
 				var msg string = "Enter a string (max size - " + strconv.Itoa(max_input_size) + "): "
-
 				row, col := 0, 0
 				stdscr.MovePrint(0, 0, msg)
-
 				var str string
 				str, err = stdscr.GetString(30) //max 30 chars
 				if err != nil {
 					stdscr.MovePrint(row+1, col, "GetString Error:", err)
 				} else {
 					stdscr.MovePrintf(row+1, col, "You entered: %s", str)
-					//Display binary and hex
 					stdscr.MovePrintf(row+2, col, "Binary: %s", strToBinary(str))
 					stdscr.MovePrintf(row+3, col, "Hex: %s", strToHex(str))
 				}
 				stdscr.Refresh()
 				stdscr.GetChar()
-
-			} else if menu_choice == 1 {
-				//binary to text
+				////////////////////////////////////////////////////////
+			} else if menu_choice == 1 { //binary to text
 				var msg string = "Enter a decimal string (NO SPACES): "
-
 				gc.Echo(false)
-
 				row, col := 0, 0
 				stdscr.MovePrint(0, 0, msg)
-
 				var str string = ""
 				for j := 0; j < max_input_size*8; j++ {
 					curr_char := stdscr.GetChar()
@@ -154,16 +156,12 @@ func main() {
 				stdscr.Refresh()
 				gc.Echo(true)
 				stdscr.GetChar() //exit
-			} else if menu_choice == 2 {
-				stdscr.Refresh()
-				//hex to text
+				////////////////////////////////////////////////////////
+			} else if menu_choice == 2 { //hex to text
 				var msg string = "Enter a hexadecimal string (NO SPACES, CAPS): "
-
 				gc.Echo(false)
-
 				row, col := 0, 0
 				stdscr.MovePrint(0, 0, msg)
-
 				var str string = ""
 				for j := 0; j < max_input_size*8; j++ {
 					curr_char := stdscr.GetChar()
@@ -186,8 +184,8 @@ func main() {
 				stdscr.Refresh()
 				gc.Echo(true)
 				stdscr.GetChar() //exit
-			} else if menu_choice == 3 {
-				//change max string size
+				////////////////////////////////////////////////////////
+			} else if menu_choice == 3 { //change max string size
 				stdscr.Clear()
 				stdscr.MovePrint(0, 0, "Enter new max string size: ")
 				input, _ := stdscr.GetString(100)
@@ -199,13 +197,11 @@ func main() {
 				stdscr.MovePrintf(1, 0, "Max string size set to: %d", max_input_size)
 				stdscr.Refresh()
 				stdscr.GetChar() //exit
-
-			} else {
-				//exit
+				////////////////////////////////////////////////////////
+			} else { //exit
 				stdscr.Refresh()
 				return
 			}
 		}
 	}
-
 }
